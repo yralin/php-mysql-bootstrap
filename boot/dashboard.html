@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图片评论板</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+
+        body {
+            background-color: #f0f8ff;
+        }
+
+        .image-grid {
+            column-count: 5;
+            column-gap: 16px;
+        }
+        @media (max-width: 1200px) {
+            .image-grid {
+                column-count: 4;
+            }
+        }
+        @media (max-width: 992px) {
+            .image-grid {
+                column-count: 3;
+            }
+        }
+        @media (max-width: 768px) {
+            .image-grid {
+                column-count: 2;
+            }
+        }
+        @media (max-width: 576px) {
+            .image-grid {
+                column-count: 1;
+            }
+        }
+
+        .image-card {
+            break-inside: avoid;
+            margin-bottom: 16px;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .image-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-card img:hover {
+            transform: scale(1.05);
+        }
+
+        .navbar .form-control {
+            border-radius: 20px;
+            max-width: 300px;
+            height: 36px;
+            padding: 0.375rem 1rem;
+        }
+
+        .navbar .btn-primary {
+            height: 36px;
+            padding: 0 1.5rem;
+            min-width: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .navbar .d-flex {
+            align-items: center;
+        }
+
+        .contro-size {
+            height: 36px;
+            display: flex;
+            align-items: center;
+        }
+
+        .image-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            flex-direction: row;
+            min-height: 40px;
+        }
+
+        .image-time {
+            white-space: nowrap;
+            color: #6c757d;
+            font-size: 0.75rem;
+        }
+
+        .image-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-end;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 0.75rem;
+            line-height: 1;
+        }
+
+        .stat-item i {
+            font-size: 0.875rem;
+        }
+
+        .stat-item:hover {
+            color: #0077b6;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">图片展示板</a>
+            <form class="d-flex mx-auto contro-size" onsubmit="handleSearch(event)">
+                <input class="form-control me-2" type="search" id="searchInput" placeholder="搜索图片..." aria-label="Search">
+                <button class="btn btn-primary" type="submit">搜索</button>
+            </form>
+            <div class="d-flex align-items-center">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="handleLogout()">登出</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="image-grid" id="imageGrid"></div>
+    </div>
+
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script>
+
+const imageData = [
+    {
+        image_id: 12,
+        image_title: "第一次见和AI聊出感叹号来",
+        image_time: "2024-12-22 14:09:57",
+        image_a: "uploads/6767ad3582b77.png",
+        image_comment: 3,
+        image_love: 4,
+        uid: 3
+    },
+    {
+        image_id: 13,
+        image_title: "",
+        image_time: "2024-12-22 14:22:24",
+        image_a: "uploads/6767b0207daaf.png",
+        image_comment: 3,
+        image_love: 3,
+        uid: 6
+    },
+    {
+        image_id: 14,
+        image_title: "",
+        image_time: "2024-12-22 14:26:00",
+        image_a: "uploads/6767b0f882e36.png",
+        image_comment: 3,
+        image_love: 2,
+        uid: 4
+    },
+    {
+        image_id: 15,
+        image_title: "最新爆料消息：三体动画要重启了",
+        image_time: "2024-12-22 14:49:01",
+        image_a: "uploads/6767b65d1ba3f.png",
+        image_comment: 4,
+        image_love: 1,
+        uid: 11
+    },
+    {
+        image_id: 16,
+        image_title: "国外模型竞技场评测视频模型排行榜",
+        image_time: "2024-12-22 15:14:53",
+        image_a: "uploads/6767bc6d58f26.png",
+        image_comment: 4,
+        image_love: 1,
+        uid: 4
+    },
+    {
+        image_id: 17,
+        image_title: "AI胆大党真人化转绘",
+        image_time: "2024-12-22 15:22:07",
+        image_a: "uploads/6767be1f2f11a.png",
+        image_comment: 0,
+        image_love: 0,
+        uid: 6
+    },
+    {
+        image_id: 18,
+        image_title: "高温环境可能加速衰老",
+        image_time: "2024-12-22 15:30:36",
+        image_a: "uploads/6767c01c35b03.png",
+        image_comment: 3,
+        image_love: 1,
+        uid: 6
+    },
+    {
+        image_id: 19,
+        image_title: "你和朋友共享微生物群",
+        image_time: "2024-12-22 15:38:49",
+        image_a: "uploads/6767c20905597.png",
+        image_comment: 0,
+        image_love: 0,
+        uid: 9
+    },
+    {
+        image_id: 20,
+        image_title: "肥胖“记忆”写在细胞里",
+        image_time: "2024-12-22 15:44:21",
+        image_a: "uploads/6767c355d038c.png",
+        image_comment: 2,
+        image_love: 0,
+        uid: 9
+    },
+    {
+        image_id: 21,
+        image_title: "记忆不仅存在于大脑中",
+        image_time: "2024-12-22 15:49:45",
+        image_a: "uploads/6767c499ec8d0.png",
+        image_comment: 0,
+        image_love: 0,
+        uid: 7
+    },
+    {
+        image_id: 22,
+        image_title: "人类首次梦境交流",
+        image_time: "2024-12-22 15:53:35",
+        image_a: "uploads/6767c57f304d2.png",
+        image_comment: 0,
+        image_love: 0,
+        uid: 7
+    }
+];
+        function createImageCard(image) {
+            return `
+                <div class="image-card">
+                    <div class="card">
+                        <img src="${image.image_a}" class="card-img-top" alt="${image.image_title || '无标题'}">
+                        <div class="card-body">
+                            <h5 class="card-title">${image.image_title || '无标题'}</h5>
+                            <div class="image-info">
+                                <span class="image-time">${new Date(image.image_time).toLocaleString('zh-CN')}</span>
+                                <div class="image-stats">
+                                    <button onclick="handleLike(${image.image_id})" class="btn btn-link p-0 stat-item">
+                                        <i class="bi bi-heart"></i>
+                                        <span>${image.image_love}</span>
+                                    </button>
+                                    <a href="#" class="stat-item">
+                                        <i class="bi bi-chat"></i>
+                                        <span>${image.image_comment}</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderImages(images = imageData) {
+            const imageGrid = document.getElementById('imageGrid');
+            imageGrid.innerHTML = images.map(createImageCard).join('');
+        }
+
+        function handleLike(imageId) {
+            const image = imageData.find(img => img.image_id === imageId);
+            if (image) {
+                image.image_love++;
+                renderImages();
+            }
+        }
+
+        function handleSearch(event) {
+            event.preventDefault();
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredImages = imageData.filter(image => 
+                (image.image_title || '').toLowerCase().includes(searchTerm)
+            );
+            renderImages(filteredImages);
+        }
+
+        function handleLogout() {
+            window.location.href = 'index.html';
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderImages();
+        });
+    </script>
+</body>
+</html>
